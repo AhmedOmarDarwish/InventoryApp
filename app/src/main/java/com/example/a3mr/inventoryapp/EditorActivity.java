@@ -67,8 +67,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         pquantity = findViewById( R.id.pquantity );
         suppliername = findViewById( R.id.sname );
         supplierphonenumber = findViewById( R.id.sphonenumber );
-        minus=findViewById( R.id.decrease );
-        plus=findViewById( R.id.increase );
+        minus = findViewById( R.id.decrease );
+        plus = findViewById( R.id.increase );
 
 
         pname.setOnTouchListener( mTouchListener );
@@ -76,6 +76,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         pquantity.setOnTouchListener( mTouchListener );
         suppliername.setOnTouchListener( mTouchListener );
         supplierphonenumber.setOnTouchListener( mTouchListener );
+        pquantity.setText( "0" );
         call.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,28 +91,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         } );
 
-        minus.setOnClickListener(new View.OnClickListener() {
+        minus.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quantity = Integer.parseInt(pquantity.getText().toString().trim());
+                quantity = Integer.parseInt( pquantity.getText().toString().trim() );
                 if (quantity == 0) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.no_negative_quantity),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText( getApplicationContext(), getString( R.string.no_negative_quantity ),
+                            Toast.LENGTH_SHORT ).show();
                 } else {
                     quantity--;
-                    pquantity.setText(Integer.toString(quantity));
+                    pquantity.setText( Integer.toString( quantity ) );
                 }
             }
-        });
+        } );
 
-        plus.setOnClickListener(new View.OnClickListener() {
+        plus.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quantity = Integer.parseInt(pquantity.getText().toString().trim());
+                quantity = Integer.parseInt( pquantity.getText().toString().trim() );
                 quantity++;
-                pquantity.setText(Integer.toString(quantity));
+                pquantity.setText( Integer.toString( quantity ) );
             }
-        });
+        } );
     }
 
 
@@ -162,6 +163,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
 
     }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate( R.menu.editor_menu, menu );
         return true;
