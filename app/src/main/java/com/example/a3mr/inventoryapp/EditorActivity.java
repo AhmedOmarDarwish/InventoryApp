@@ -33,6 +33,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     EditText suppliername;
     EditText supplierphonenumber;
     ImageButton call;
+    ImageButton plus;
+    ImageButton minus;
+    int quantity;
     private boolean mPetHasChanged = false;
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -49,7 +52,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_editor );
-        call=findViewById( R.id.callsupplier );
+        call = findViewById( R.id.callsupplier );
         Intent intent = getIntent();
         mCurrentProductUri = intent.getData();
         if (mCurrentProductUri == null) {
@@ -64,23 +67,49 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         pquantity = findViewById( R.id.pquantity );
         suppliername = findViewById( R.id.sname );
         supplierphonenumber = findViewById( R.id.sphonenumber );
+        minus=findViewById( R.id.decrease );
+        plus=findViewById( R.id.increase );
+
 
         pname.setOnTouchListener( mTouchListener );
         pprice.setOnTouchListener( mTouchListener );
         pquantity.setOnTouchListener( mTouchListener );
         suppliername.setOnTouchListener( mTouchListener );
         supplierphonenumber.setOnTouchListener( mTouchListener );
-        call.setOnClickListener(new View.OnClickListener() {
+        call.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 String phone = supplierphonenumber.getText().toString().trim();
-                if (!TextUtils.isEmpty(phone)) {
-                    Uri uri = Uri.parse("tel:" + phone);
-                    Intent intent = new Intent(Intent.ACTION_DIAL, uri);
-                    startActivity(intent);
+                String phone = supplierphonenumber.getText().toString().trim();
+                if (!TextUtils.isEmpty( phone )) {
+                    Uri uri = Uri.parse( "tel:" + phone );
+                    Intent intent = new Intent( Intent.ACTION_DIAL, uri );
+                    startActivity( intent );
                 } else {
-                    Toast.makeText(EditorActivity.this,"Invalid phone number", Toast.LENGTH_SHORT).show();
+                    Toast.makeText( EditorActivity.this, "Invalid phone number", Toast.LENGTH_SHORT ).show();
                 }
+            }
+        } );
+
+        minus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                quantity = Integer.parseInt(pquantity.getText().toString().trim());
+                if (quantity == 0) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.no_negative_quantity),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    quantity--;
+                    pquantity.setText(Integer.toString(quantity));
+                }
+            }
+        });
+
+        plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                quantity = Integer.parseInt(pquantity.getText().toString().trim());
+                quantity++;
+                pquantity.setText(Integer.toString(quantity));
             }
         });
     }
@@ -94,44 +123,45 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String supplierphone = supplierphonenumber.getText().toString().trim();
 
 
-        if (mCurrentProductUri == null &&
-                TextUtils.isEmpty( productname ) && TextUtils.isEmpty( producprice ) &&
-                TextUtils.isEmpty( producquantity ) && TextUtils.isEmpty( suppliername ) && TextUtils.isEmpty( supplierphone )) {
-            return;
-        }
-        ContentValues values = new ContentValues();
-        values.put( ProductEntry.COLUMN_PRODUCT_NAME, productname );
-        values.put( ProductEntry.COLUMN_PRODUCT_PRICE, producprice );
-        values.put( ProductEntry.COLUMN_PRODUCT_QUANTITY, producquantity );
-        values.put( ProductEntry.COLUMN_SUPPLIER_NAME, suppliername );
-        values.put( ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierphone );
-
-        if (mCurrentProductUri == null) {
-            Uri newUri = getContentResolver().insert( ProductEntry.CONTENT_URI, values );
-
-            if (newUri == null) {
-
-                Toast.makeText( this, getString( R.string.error_saving ),
-                        Toast.LENGTH_SHORT ).show();
-            } else {
-
-                Toast.makeText( this, getString( R.string.product_saved ),
-                        Toast.LENGTH_SHORT ).show();
-            }
+        if (mCurrentProductUri == null || TextUtils.isEmpty( productname ) || TextUtils.isEmpty( producprice ) ||
+                TextUtils.isEmpty( producquantity ) || TextUtils.isEmpty( supplierphone )) {
+            Toast.makeText( this, "One or more input are missing , Please check again !!", Toast.LENGTH_SHORT ).show();
         } else {
+            ContentValues values = new ContentValues();
+            values.put( ProductEntry.COLUMN_PRODUCT_NAME, productname );
+            values.put( ProductEntry.COLUMN_PRODUCT_PRICE, producprice );
+            values.put( ProductEntry.COLUMN_PRODUCT_QUANTITY, producquantity );
+            values.put( ProductEntry.COLUMN_SUPPLIER_NAME, suppliername );
+            values.put( ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierphone );
 
-            int rowsAffected = getContentResolver().update( mCurrentProductUri, values, null, null );
-            if (rowsAffected == 0) {
-                Toast.makeText( this, getString( R.string.editor_update_product_failed ),
-                        Toast.LENGTH_SHORT ).show();
+            if (mCurrentProductUri == null) {
+                Uri newUri = getContentResolver().insert( ProductEntry.CONTENT_URI, values );
+
+                if (newUri == null) {
+
+                    Toast.makeText( this, getString( R.string.error_saving ),
+                            Toast.LENGTH_SHORT ).show();
+                } else {
+
+                    Toast.makeText( this, getString( R.string.product_saved ),
+                            Toast.LENGTH_SHORT ).show();
+                }
             } else {
-                // Otherwise, the update was successful and we can display a toast.
-                Toast.makeText( this, getString( R.string.editor_update_product_successful ),
-                        Toast.LENGTH_SHORT ).show();
+
+                int rowsAffected = getContentResolver().update( mCurrentProductUri, values, null, null );
+                if (rowsAffected == 0) {
+                    Toast.makeText( this, getString( R.string.editor_update_product_failed ),
+                            Toast.LENGTH_SHORT ).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast.
+                    Toast.makeText( this, getString( R.string.editor_update_product_successful ),
+                            Toast.LENGTH_SHORT ).show();
+                    finish();
+                }
             }
         }
-    }
 
+    }
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate( R.menu.editor_menu, menu );
         return true;
@@ -152,7 +182,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             case R.id.action_save:
                 savePet();
-                finish();
                 return true;
             case R.id.action_delete:
                 showDeleteConfirmationDialog();
