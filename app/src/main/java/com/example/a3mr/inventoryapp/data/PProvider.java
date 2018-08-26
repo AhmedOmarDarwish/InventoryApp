@@ -11,6 +11,9 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.a3mr.inventoryapp.R;
 
 import static com.example.a3mr.inventoryapp.data.ProductContract.CONTENT_AUTHORITY;
 import static com.example.a3mr.inventoryapp.data.ProductContract.PATH_Products;
@@ -150,7 +153,8 @@ public class PProvider extends ContentProvider {
         }
 
         if (values.containsKey( ProductEntry.COLUMN_PRODUCT_QUANTITY )) {
-            Integer Quantity = values.getAsInteger( ProductEntry.COLUMN_PRODUCT_QUANTITY );
+
+            Integer Quantity = Integer.parseInt( ProductEntry.COLUMN_PRODUCT_QUANTITY );
             if (Quantity == null && Quantity < 0) {
                 throw new IllegalArgumentException( "Product requires valid quantity" );
             }

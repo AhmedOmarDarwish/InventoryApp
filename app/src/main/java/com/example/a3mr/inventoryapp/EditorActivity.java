@@ -36,13 +36,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     ImageButton plus;
     ImageButton minus;
     int quantity;
-    private boolean mPetHasChanged = false;
+    private boolean mProductHasChanged = false;
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            mPetHasChanged = true;
+            mProductHasChanged = true;
             return false;
         }
     };
@@ -70,13 +70,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         minus = findViewById( R.id.decrease );
         plus = findViewById( R.id.increase );
 
-
+        pquantity.setText( "0" );
         pname.setOnTouchListener( mTouchListener );
         pprice.setOnTouchListener( mTouchListener );
         pquantity.setOnTouchListener( mTouchListener );
         suppliername.setOnTouchListener( mTouchListener );
         supplierphonenumber.setOnTouchListener( mTouchListener );
-        pquantity.setText( "0" );
+
         call.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,7 +84,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 if (!TextUtils.isEmpty( phone )) {
                     Uri uri = Uri.parse( "tel:" + phone );
                     Intent intent = new Intent( Intent.ACTION_DIAL, uri );
-                    startActivity( intent );
+                    if (intent.resolveActivity( getPackageManager() ) != null) {
+                        startActivity( intent );
+                    }
                 } else {
                     Toast.makeText( EditorActivity.this, "Invalid phone number", Toast.LENGTH_SHORT ).show();
                 }
@@ -94,6 +96,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         minus.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 quantity = Integer.parseInt( pquantity.getText().toString().trim() );
                 if (quantity == 0) {
                     Toast.makeText( getApplicationContext(), getString( R.string.no_negative_quantity ),
@@ -103,6 +106,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     pquantity.setText( Integer.toString( quantity ) );
                 }
             }
+
         } );
 
         plus.setOnClickListener( new View.OnClickListener() {
@@ -116,18 +120,29 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
 
-    private void savePet() {
+    private void saveOrinsertProduct() {
         String productname = pname.getText().toString().trim();
         String producprice = pprice.getText().toString().trim();
         String producquantity = pquantity.getText().toString().trim();
         String suppliername = this.suppliername.getText().toString().trim();
         String supplierphone = supplierphonenumber.getText().toString().trim();
 
-
-        if (mCurrentProductUri == null || TextUtils.isEmpty( productname ) || TextUtils.isEmpty( producprice ) ||
-                TextUtils.isEmpty( producquantity ) || TextUtils.isEmpty( supplierphone )) {
-            Toast.makeText( this, "One or more input are missing , Please check again !!", Toast.LENGTH_SHORT ).show();
+        if (mCurrentProductUri == null && TextUtils.isEmpty( productname ) && TextUtils.isEmpty( producprice ) && TextUtils.isEmpty( suppliername ) && TextUtils.isEmpty( supplierphone )) {
+            return;
+        }
+        if (TextUtils.isEmpty( productname ) || TextUtils.isEmpty( producprice ) || TextUtils.isEmpty( producquantity )
+                || TextUtils.isEmpty( suppliername ) || TextUtils.isEmpty( supplierphone )) {
+            Toast.makeText( this, "One or more input are missing !!", Toast.LENGTH_SHORT ).show();
         } else {
+
+//        int Price = 0;
+//        if (!TextUtils.isEmpty( producprice )) {
+//            Price = Integer.parseInt( producprice );
+//        }
+//        int Quantity = 0;
+//        if (!TextUtils.isEmpty( producquantity )) {
+//            Quantity = Integer.parseInt( producquantity );
+//        }
             ContentValues values = new ContentValues();
             values.put( ProductEntry.COLUMN_PRODUCT_NAME, productname );
             values.put( ProductEntry.COLUMN_PRODUCT_PRICE, producprice );
@@ -147,6 +162,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     Toast.makeText( this, getString( R.string.product_saved ),
                             Toast.LENGTH_SHORT ).show();
                 }
+                finish();
             } else {
 
                 int rowsAffected = getContentResolver().update( mCurrentProductUri, values, null, null );
@@ -161,8 +177,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 }
             }
         }
-
     }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate( R.menu.editor_menu, menu );
@@ -183,13 +199,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                savePet();
+                saveOrinsertProduct();
                 return true;
             case R.id.action_delete:
                 showDeleteConfirmationDialog();
                 return true;
             case android.R.id.home:
-                if (!mPetHasChanged) {
+                if (!mProductHasChanged) {
                     NavUtils.navigateUpFromSameTask( EditorActivity.this );
                     return true;
                 }
@@ -210,7 +226,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onBackPressed() {
-        if (!mPetHasChanged) {
+        if (!mProductHasChanged) {
             super.onBackPressed();
             return;
         }
